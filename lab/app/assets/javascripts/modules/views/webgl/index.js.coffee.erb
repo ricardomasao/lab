@@ -1,0 +1,67 @@
+Particle = require "views/webgl/particle"
+
+module.exports = class WebglIndex
+
+  dom:null
+  scene:null
+  camera:null
+  renderer:null
+  cube:null
+  array_particles:[]
+
+  constructor:()->
+
+    @dom = $ 'main'
+    @time = new Date();
+
+    @scene = new THREE.Scene()
+    @camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    @renderer = new THREE.WebGLRenderer()
+    @renderer.setSize window.innerWidth, window.innerHeight
+
+    @dom.append @renderer.domElement
+
+    geometry = new THREE.PlaneGeometry(8, 2, 80, 20)
+    mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: 0x00ff00, opacity: 0 }))
+
+    #@scene.add mesh
+
+    texture = THREE.ImageUtils.loadTexture( "<%= asset_path('particle_a.png') %>" )
+
+    @geometry2 = new THREE.Geometry()
+    @geometry2.vertices = geometry.vertices
+
+    particles = new THREE.PointCloud(@geometry2, new THREE.PointCloudMaterial(
+      transparent:true
+      map: texture
+      size: .1
+    ))
+
+    for i of @geometry2.vertices
+      particle = new Particle @geometry2.vertices[i], Math.random()*0.05
+      @array_particles.push particle
+
+    @scene.add particles
+
+    particles.rotation.x = -1.4
+
+    @camera.position.z = 3;
+    @camera.position.y = 1;
+
+    @render()
+
+  render:()=>
+
+    i = 0
+    while i < @array_particles.length
+      particle = @array_particles[i]
+      particle.counter += particle.interval
+      particle.set_z(Math.sin( particle.counter )/10)
+      console.log @geometry2.vertices[i].z if i == 1
+      i++
+
+    @geometry2.verticesNeedUpdate = true;
+
+    requestAnimationFrame @render
+    @renderer.render @scene, @camera
+    return
