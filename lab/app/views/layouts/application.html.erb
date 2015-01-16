@@ -10,16 +10,19 @@
   <script type="x-shader/x-vertex" id="vertexshader">
 
       attribute float alpha;
+      attribute float size;
 
       varying float vAlpha;
+      varying float vSize;
 
       void main() {
 
           vAlpha = alpha;
+          vSize = size;
 
           vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
-          gl_PointSize = 16.0;
+          gl_PointSize = vSize;
 
           gl_Position = projectionMatrix * mvPosition;
 

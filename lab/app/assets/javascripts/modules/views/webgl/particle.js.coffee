@@ -2,15 +2,12 @@ module.exports = class Particle
 
   obj:null
   interval:null
-  _x:0
-  _y:0
-  _z:0
   counter:0
+  index:0
+  attributes:null
 
-  constructor:(@obj, @interval)->
-    @_x = @obj.x
-    @_y = @obj.y
-    @_z = @obj.z
+  constructor:(@obj, @interval, @attributes, @index)->
+
 
   set_x:(value)->
     @obj.x = value
@@ -18,11 +15,17 @@ module.exports = class Particle
   get_x:()->
     return @obj.x
 
+  random_x:(value)->
+    @obj.x += value
+
   set_y:(value)->
     @obj.y = value
 
   get_y:()->
     return @obj.y
+
+  random_y:(value)->
+    @obj.y += value
 
   set_z:(value)->
     return if value < @obj.z
@@ -33,3 +36,17 @@ module.exports = class Particle
 
   move_z:(value)->
     @obj.z = value
+
+  set_alpha:(value)->
+    @attributes.alpha.value[@index] = value
+
+  get_alpha:()->
+    return @attributes.alpha.value[@index]
+
+  set_size:(value)->
+    @attributes.size.value[@index] = value
+
+  get_size:()->
+    return @attributes.size.value[@index]
+
+  stat_moving:()->

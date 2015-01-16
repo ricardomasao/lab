@@ -9,6 +9,7 @@ module.exports = class WebglIndex
   geometry:null
   array_particles:[]
   array_elevations:[]
+  attributes:null
 
   constructor:()->
 
@@ -22,10 +23,10 @@ module.exports = class WebglIndex
 
     @dom.append @renderer.domElement
 
-    @geometry = new THREE.PlaneGeometry(8, 2, 120, 50)
+    @geometry = new THREE.PlaneGeometry(8, 4, 200, 100)
     mesh = new THREE.Mesh(@geometry, new THREE.MeshBasicMaterial({color: 0x00ff00, opacity: 0 }))
 
-    texture = THREE.ImageUtils.loadTexture( "<%= asset_path('particle_b.png') %>" )
+    texture = THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare0.jpg') %>" )
 
     @geometry2 = new THREE.Geometry()
     @geometry2.vertices = @geometry.vertices
@@ -36,34 +37,40 @@ module.exports = class WebglIndex
     #   size: .1
     # ))
 
-    attributes = alpha:
-      type: "f"
-      value: []
+    @attributes =
+      alpha:{type: "f", value: []}
+      size:{type: "f", value: []}
 
-    uniforms = texture1:
-      type: "t"
-      value: texture
+    uniforms =
+      texture1: { type: "t", value: THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare0.jpg') %>" ) }
+      color: { type: "c", value: new THREE.Color( 0xffffff ) }
 
-    particles = new THREE.PointCloud(@geometry2, new THREE.ShaderMaterial(
+
+    @shader_material = new THREE.ShaderMaterial(
       uniforms: uniforms
-      attributes: attributes
+      attributes: @attributes
+      blending: THREE.AdditiveBlending
       vertexShader: document.getElementById("vertexshader").textContent
       fragmentShader: document.getElementById("fragmentshader").textContent
       transparent: true
-    ))
+    )
+
+    particles = new THREE.PointCloud(@geometry2, @shader_material)
 
     for i of @geometry2.vertices
-      particle = new Particle @geometry2.vertices[i], Math.random()*0.05
+      particle = new Particle @geometry2.vertices[i], Math.random()*0.05, @attributes, i
+      particle.set_size Math.random()*2
+      particle.set_alpha Math.random()*.5
       @array_particles.push particle
 
     @scene.add particles
 
-    particles.rotation.x = -1.4
+    particles.rotation.x = -1.7
 
     @camera.position.z = 3;
     @camera.position.y = 1;
 
-    @setup_elevation(15)
+    @setup_elevation(50)
     @generate_terrain()
 
     @render()
@@ -99,7 +106,9 @@ module.exports = class WebglIndex
   rise_terrain:(points,center, radius)=>
     for i of points
       distance = @get_distance_between_points(points[i], center)
-      points[i].set_z Math.abs( distance - radius )/3
+      points[i].set_z Math.abs( distance - radius )/4
+      points[i].random_x Math.random()*0.03 - Math.random()*0.03
+      points[i].random_y Math.random()*0.03 - Math.random()*0.03
 
   get_distance_between_points:(p1,p2)->
     p1_x = p1.get_x()
@@ -118,6 +127,7 @@ module.exports = class WebglIndex
       # particle.move_z(Math.sin( particle.counter )/10)
       i++
 
+    @attributes.alpha.needsUpdate = true
     @geometry2.verticesNeedUpdate = true;
 
     requestAnimationFrame @render
