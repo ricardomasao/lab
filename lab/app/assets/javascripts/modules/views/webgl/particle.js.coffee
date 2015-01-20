@@ -7,7 +7,7 @@ module.exports = class Particle
   attributes:null
 
   constructor:(@obj, @interval, @attributes, @index)->
-
+    @set_alpha(0)
 
   set_x:(value)->
     @obj.x = value
@@ -42,6 +42,12 @@ module.exports = class Particle
 
   get_alpha:()->
     return @attributes.alpha.value[@index]
+
+  set_color:(value)->
+    @attributes.alpha.value[@index] = value
+
+  get_color:()->
+    return @attributes.color.value[@index]
 
   set_size:(value)->
     @attributes.size.value[@index] = value

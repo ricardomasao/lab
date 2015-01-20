@@ -10,6 +10,7 @@ module.exports = class WebglIndex
   array_particles:[]
   array_elevations:[]
   attributes:null
+  texture:null
 
   constructor:()->
 
@@ -26,24 +27,18 @@ module.exports = class WebglIndex
     @geometry = new THREE.PlaneGeometry(8, 4, 200, 100)
     mesh = new THREE.Mesh(@geometry, new THREE.MeshBasicMaterial({color: 0x00ff00, opacity: 0 }))
 
-    texture = THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare0.jpg') %>" )
+    @texture = THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare0.jpg') %>" )
 
     @geometry2 = new THREE.Geometry()
     @geometry2.vertices = @geometry.vertices
 
-    # particles = new THREE.PointCloud(@geometry2, new THREE.PointCloudMaterial(
-    #   transparent:true
-    #   map: texture
-    #   size: .1
-    # ))
-
     @attributes =
       alpha:{type: "f", value: []}
       size:{type: "f", value: []}
+      size:{color: "c", value: []}
 
     uniforms =
-      texture1: { type: "t", value: THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare0.jpg') %>" ) }
-      color: { type: "c", value: new THREE.Color( 0xffffff ) }
+      textures: { type: "tv", value: [@texture,@texture,@texture] }
 
 
     @shader_material = new THREE.ShaderMaterial(
@@ -56,11 +51,13 @@ module.exports = class WebglIndex
     )
 
     particles = new THREE.PointCloud(@geometry2, @shader_material)
+    particles.sortParticles = true;
 
     for i of @geometry2.vertices
       particle = new Particle @geometry2.vertices[i], Math.random()*0.05, @attributes, i
-      particle.set_size Math.random()*2
+      particle.set_size Math.random()*6
       particle.set_alpha Math.random()*.5
+      particle.set_color new THREE.Color(0xffffff)
       @array_particles.push particle
 
     @scene.add particles
@@ -128,7 +125,7 @@ module.exports = class WebglIndex
       i++
 
     @attributes.alpha.needsUpdate = true
-    @geometry2.verticesNeedUpdate = true;
+    @geometry2.verticesNeedUpdate = true
 
     requestAnimationFrame @render
     @renderer.render @scene, @camera
