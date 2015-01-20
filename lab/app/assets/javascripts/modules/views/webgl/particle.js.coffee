@@ -5,9 +5,16 @@ module.exports = class Particle
   counter:0
   index:0
   attributes:null
+  initial_z:0
+  velocity:0
 
   constructor:(@obj, @interval, @attributes, @index)->
-    @set_alpha(0)
+    @obj.size = 0
+
+  show:(time,size)->
+    TweenMax.to @obj, time, { size:size, delay:1+Math.random()*4, ease:Expo.easeOut, onUpdate:=>
+      @set_size @obj.size
+    }
 
   set_x:(value)->
     @obj.x = value
@@ -29,7 +36,7 @@ module.exports = class Particle
 
   set_z:(value)->
     return if value < @obj.z
-    @obj.z = value
+    @initial_z = @obj.z = value
 
   get_z:()->
     return @obj.z
@@ -54,5 +61,3 @@ module.exports = class Particle
 
   get_size:()->
     return @attributes.size.value[@index]
-
-  stat_moving:()->

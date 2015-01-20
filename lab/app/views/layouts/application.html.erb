@@ -7,52 +7,6 @@
   <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tags %>
 
-  <script type="x-shader/x-vertex" id="vertexshader">
-
-      attribute float alpha;
-      attribute float size;
-      attribute vec3 color;
-
-      varying float vAlpha;
-      varying float vSize;
-      varying vec3 vColor;
-
-      void main() {
-
-          vAlpha = alpha;
-          vSize = size;
-          vColor = color;
-
-          vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-
-          gl_PointSize = vSize;
-          gl_Position = projectionMatrix * mvPosition;
-
-      }
-
-  </script>
-
-  <script type="x-shader/x-fragment" id="fragmentshader">
-
-      uniform sampler2D textures[3];
-      //attribute vec3 color;
-      //varying float vAlpha;
-
-      varying vec3 vColor;
-
-      void main() {
-          vec4 startColor = vec4(vColor, 1.0);
-          vec4 finalColor;
-
-          finalColor = texture2D(textures[0], gl_PointCoord);
-
-          gl_FragColor = startColor * finalColor;
-          //gl_FragColor = vec4( color, vAlpha );
-
-      }
-
-  </script>
-
 </head>
 <body>
   <main class="main">

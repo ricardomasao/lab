@@ -11,23 +11,31 @@ module.exports = class WebglIndex
   array_elevations:[]
   attributes:null
   texture:null
+  texture_a:null
+  texture_b:null
+  shader:null
+  stats:null
 
   constructor:()->
 
     @dom = $ 'main'
-    @time = new Date();
+    @setup_shaders()
+    @setup_stats()
 
     @scene = new THREE.Scene()
+    @scene.fog = new THREE.Fog( 0xFF0000, 0, 3 );
     @camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
     @renderer = new THREE.WebGLRenderer()
     @renderer.setSize window.innerWidth, window.innerHeight
 
     @dom.append @renderer.domElement
 
-    @geometry = new THREE.PlaneGeometry(8, 4, 200, 100)
+    @geometry = new THREE.PlaneGeometry(10, 4, 180, 80)
     mesh = new THREE.Mesh(@geometry, new THREE.MeshBasicMaterial({color: 0x00ff00, opacity: 0 }))
 
     @texture = THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare0.jpg') %>" )
+    @texture_a = THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare3.jpg') %>" )
+    @texture_b = THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare2.jpg') %>" )
 
     @geometry2 = new THREE.Geometry()
     @geometry2.vertices = @geometry.vertices
@@ -35,27 +43,34 @@ module.exports = class WebglIndex
     @attributes =
       alpha:{type: "f", value: []}
       size:{type: "f", value: []}
-      size:{color: "c", value: []}
+      index:{type: "f", value: []}
 
     uniforms =
-      textures: { type: "tv", value: [@texture,@texture,@texture] }
+      textures: { type: "tv", value: [@texture,@texture_a,@texture_b] }
+      fogColor:    { type: "c", value: @scene.fog.color },
+      fogNear:     { type: "f", value: @scene.fog.near },
+      fogFar:      { type: "f", value: @scene.fog.far }
 
 
     @shader_material = new THREE.ShaderMaterial(
       uniforms: uniforms
       attributes: @attributes
       blending: THREE.AdditiveBlending
-      vertexShader: document.getElementById("vertexshader").textContent
-      fragmentShader: document.getElementById("fragmentshader").textContent
+      vertexShader: @shader.vertexShader
+      fragmentShader: @shader.fragmentShader
       transparent: true
+      fog:true
     )
+    @shader_material.fog
 
     particles = new THREE.PointCloud(@geometry2, @shader_material)
     particles.sortParticles = true;
 
     for i of @geometry2.vertices
-      particle = new Particle @geometry2.vertices[i], Math.random()*0.05, @attributes, i
-      particle.set_size Math.random()*6
+      particle = new Particle @geometry2.vertices[i], Math.random()*0.1, @attributes, i
+      @attributes.index.value[i] = Math.random() * 3 | 0
+      particle.velocity = 100 + Math.random()*500
+      particle.set_size 0 #Math.random()*6
       particle.set_alpha Math.random()*.5
       particle.set_color new THREE.Color(0xffffff)
       @array_particles.push particle
@@ -64,13 +79,21 @@ module.exports = class WebglIndex
 
     particles.rotation.x = -1.7
 
-    @camera.position.z = 3;
+    @camera.position.z = -.5;
     @camera.position.y = 1;
 
-    @setup_elevation(50)
+    @setup_elevation(55)
     @generate_terrain()
 
     @render()
+    @show()
+
+  show:()->
+    for i of @array_particles
+      @array_particles[i].show(Math.random()*4, Math.random()*8)# if parseInt(i) is 0
+
+    TweenMax.to @camera.position, 5, { z:2.5, ease:Expo.easeInOut }
+
 
   setup_elevation:(num_points)=>
     i = 0
@@ -115,17 +138,79 @@ module.exports = class WebglIndex
 
     return Math.sqrt( (p2_x-=p1_x)*p2_x + (p2_y-=p1_y)*p2_y );
 
+  setup_shaders:()->
+    @shader =
+      vertexShader: [
+        "attribute float alpha;"
+        "attribute float size;"
+        "attribute vec3 color;"
+        "attribute float index;"
+
+        "varying float vAlpha;"
+        "varying float vSize;"
+        "varying vec3 vColor;",
+        "varying float vIndex;"
+
+        THREE.ShaderChunk[ "fog_fragment" ],
+
+        "void main() {"
+
+            "vAlpha = alpha;"
+            "vSize = size;"
+            "vColor = color;"
+            "vIndex = index;"
+
+            "vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );"
+
+            "gl_PointSize = vSize;"
+            "gl_Position = projectionMatrix * mvPosition;"
+
+        "}"
+      ].join("\n")
+
+      fragmentShader: [
+        "uniform sampler2D textures[3];"
+
+        "varying vec3 vColor;",
+        "varying float vIndex;",
+
+        THREE.ShaderChunk[ "fog_pars_fragment" ],
+
+        "void main() {"
+            "vec4 t;"
+
+            "if (vIndex == 0.0) {"
+                "t = texture2D(textures[0], gl_PointCoord);"
+            "} else if (vIndex == 1.0) {"
+                "t = texture2D(textures[1], gl_PointCoord);"
+            "} else if (vIndex == 2.0) {"
+                "t = texture2D(textures[2], gl_PointCoord);"
+            "}"
+
+            "gl_FragColor = t;"
+
+        "}"
+      ].join("\n")
+
+  setup_stats:()->
+    @stats = new Stats();
+    @stats.domElement.style.position = 'absolute';
+    @stats.domElement.style.top = '0px';
+    $('body').append( @stats.domElement );
+
   render:()=>
 
     i = 0
     while i < @array_particles.length
       particle = @array_particles[i]
       particle.counter += particle.interval
-      # particle.move_z(Math.sin( particle.counter )/10)
+      particle.move_z( particle.initial_z + (Math.sin( particle.counter )/particle.velocity) ) if particle.initial_z != 0
       i++
 
     @attributes.alpha.needsUpdate = true
     @geometry2.verticesNeedUpdate = true
+
+    @stats.update()
 
     requestAnimationFrame @render
     @renderer.render @scene, @camera
