@@ -30,7 +30,7 @@ module.exports = class WebglIndex
 
     @dom.append @renderer.domElement
 
-    @geometry = new THREE.PlaneGeometry(10, 4, 180, 80)
+    @geometry = new THREE.PlaneGeometry(10, 4, 170, 70)
     mesh = new THREE.Mesh(@geometry, new THREE.MeshBasicMaterial({color: 0x00ff00, opacity: 0 }))
 
     @texture = THREE.ImageUtils.loadTexture( "<%= asset_path('lensflare0.jpg') %>" )
@@ -90,7 +90,7 @@ module.exports = class WebglIndex
 
   show:()->
     for i of @array_particles
-      @array_particles[i].show(Math.random()*4, Math.random()*8)# if parseInt(i) is 0
+      @array_particles[i].show(Math.random()*4, 1+Math.random()*8)# if parseInt(i) is 0
 
     TweenMax.to @camera.position, 5, { z:2.5, ease:Expo.easeInOut }
 
@@ -207,7 +207,6 @@ module.exports = class WebglIndex
       particle.move_z( particle.initial_z + (Math.sin( particle.counter )/particle.velocity) ) if particle.initial_z != 0
       i++
 
-    @attributes.alpha.needsUpdate = true
     @geometry2.verticesNeedUpdate = true
 
     @stats.update()
