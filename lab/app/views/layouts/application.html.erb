@@ -3,13 +3,32 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Ricardo Masao Lab</title>
+
+  <link type="text/css" rel="stylesheet" media="screen, projection" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/black-tie/jquery-ui.css" />
+
+  <!--[if lt IE 9]>
+    <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+  <![endif]-->
+
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-  <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tags %>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+  <%= javascript_include_tag 'application' %>
 
 </head>
 <body>
-  <main class="main">
+
+  <script>
+    jQuery(function()
+    {
+      var layout = require("views/layouts/layout")
+    })
+  </script>
+
+  <%= render :partial=> "layouts/header" %>
+
+  <main class="application">
     <%= yield %>
   </main>
 

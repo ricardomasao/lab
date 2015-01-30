@@ -20,7 +20,7 @@ module.exports = class WebglIndex
 
     @dom = $ 'main'
     @setup_shaders()
-    @setup_stats()
+    #@setup_stats()
 
     @scene = new THREE.Scene()
     @scene.fog = new THREE.Fog( 0xFF0000, 0, 3 );
@@ -209,7 +209,7 @@ module.exports = class WebglIndex
 
     @geometry2.verticesNeedUpdate = true
 
-    @stats.update()
+    #@stats.update()
 
     requestAnimationFrame @render
     @renderer.render @scene, @camera

@@ -1,0 +1,46 @@
+@import "shared/variables";
+
+html
+{
+	-webkit-font-smoothing: antialiased;
+}
+
+p
+{
+  -webkit-font-smoothing: antialiased;
+}
+
+.clear
+{
+  clear: both;
+}
+
+*
+{
+	box-sizing: border-box;
+}
+
+@media screen and (min-width: $phablet)
+{
+
+}
+
+@media screen and (min-width: $tablet)
+{
+
+}
+
+@media screen and (min-width: $tablet_horizontal)
+{
+
+}
+
+@media screen and (min-width: $desktop)
+{
+
+}
+
+@media screen and (min-width: $desktop_large)
+{
+
+}

@@ -1,0 +1,63 @@
+@import "shared/variables";
+
+header
+{
+  background-color:#212121;
+  position: fixed;
+  height:45px;
+  width: 100%;
+  z-index: 1000;
+
+  nav
+  {
+
+    text-align: center;
+
+    a
+    {
+      border-bottom: 2px solid #CACACA;
+      color: #CACACA;
+      display: inline-block;
+      line-height: normal;
+      text-decoration: none;
+      padding-top: 14px;
+      padding-bottom: 13px;
+      padding-left: 18px;
+      padding-right: 18px;
+
+       box-sizing:border-box;
+      -moz-box-sizing:border-box;
+      -webkit-box-sizing:border-box;
+    }
+    a:hover
+    {
+      border-bottom: 4px solid #CACACA;
+      padding-bottom: 11px;
+    }
+  }
+}
+
+@media screen and (min-width: $phablet)
+{
+
+}
+
+@media screen and (min-width: $tablet)
+{
+
+}
+
+@media screen and (min-width: $tablet_horizontal)
+{
+
+}
+
+@media screen and (min-width: $desktop)
+{
+
+}
+
+@media screen and (min-width: $desktop_large)
+{
+
+}
